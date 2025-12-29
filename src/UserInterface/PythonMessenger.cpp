@@ -155,7 +155,11 @@ PyObject * messengerSetMessengerHandler(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_messenger(void)
+#else
 void initMessenger()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -168,5 +172,17 @@ void initMessenger()
 		{ NULL,							NULL,								NULL         },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef messengermodule = {
+		PyModuleDef_HEAD_INIT,
+		"messenger",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&messengermodule);
+#else
 	Py_InitModule("messenger", s_methods);
+#endif
 }

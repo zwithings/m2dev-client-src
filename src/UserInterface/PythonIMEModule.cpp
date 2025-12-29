@@ -251,7 +251,11 @@ PyObject* imePasteReturn(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_ime(void)
+#else
 void initime()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -297,5 +301,17 @@ void initime()
 		{ NULL,						NULL,						NULL		 },
 	};	
 
+#ifdef PYTHON_3
+	static PyModuleDef imemodule = {
+		PyModuleDef_HEAD_INIT,
+		"ime",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&imemodule);
+#else
 	Py_InitModule("ime", s_methods);
+#endif
 }

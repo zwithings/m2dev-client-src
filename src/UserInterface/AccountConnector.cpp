@@ -288,10 +288,11 @@ bool CAccountConnector::__AuthState_SendPong()
 {
 	TPacketCGPong kPacketPong;
 	kPacketPong.bHeader = HEADER_CG_PONG;
-	kPacketPong.bSequence = GetNextSequence();
-
 	if (!Send(sizeof(kPacketPong), &kPacketPong))
 		return false;
+
+	if (IsSecurityMode())
+		return SendSequence();
 
 	return true;
 }

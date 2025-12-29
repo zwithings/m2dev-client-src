@@ -1221,7 +1221,11 @@ PyObject * chrtestSetRideMan(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_chr(void)
+#else
 void initchr()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -1322,7 +1326,19 @@ void initchr()
 		{ NULL,								NULL,								NULL		 },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef chrmodule = {
+		PyModuleDef_HEAD_INIT,
+		"chr",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&chrmodule);
+#else
 	PyObject * poModule = Py_InitModule("chr", s_methods);
+#endif
 
 	// Length
 	PyModule_AddIntConstant(poModule, "PLAYER_NAME_MAX_LEN",				PLAYER_NAME_MAX_LEN);
@@ -1488,4 +1504,7 @@ void initchr()
 	PyModule_AddIntConstant(poModule, "NEW_AFFECT_DRAGON_SOUL_DECK1",		CInstanceBase::NEW_AFFECT_DRAGON_SOUL_DECK1);
 	PyModule_AddIntConstant(poModule, "NEW_AFFECT_DRAGON_SOUL_DECK2",		CInstanceBase::NEW_AFFECT_DRAGON_SOUL_DECK2);
 
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

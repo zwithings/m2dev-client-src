@@ -394,7 +394,11 @@ PyObject* grpTextPixelPositionToCharacterPosition(PyObject* poSelf, PyObject* po
 	return Py_BuildValue("i", iCharacterPosition);
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_grpText(void)
+#else
 void initgrpText()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -422,5 +426,17 @@ void initgrpText()
 		{ NULL, NULL, NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef grpTextmodule = {
+		PyModuleDef_HEAD_INIT,
+		"grpText",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&grpTextmodule);
+#else
 	Py_InitModule("grpText", s_methods);
+#endif
 }

@@ -658,12 +658,14 @@ bool CPythonNetworkStream::RecvPingPacket()
 
 	TPacketCGPong kPacketPong;
 	kPacketPong.bHeader = HEADER_CG_PONG;
-	kPacketPong.bSequence = GetNextSequence();
 
 	if (!Send(sizeof(TPacketCGPong), &kPacketPong))
 		return false;
 
-	return true;
+	if (IsSecurityMode())
+		return SendSequence();
+	else
+		return true;
 }
 
 bool CPythonNetworkStream::RecvDefaultPacket(int header)

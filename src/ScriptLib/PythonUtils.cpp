@@ -85,6 +85,10 @@ bool PyTuple_GetLongLong(PyObject* poArgs, int pos, long long* ret)
 		return false;
 
 	*ret = PyLong_AsLongLong(poItem);
+	if (PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
 	return true;
 }
 
@@ -99,6 +103,10 @@ bool PyTuple_GetDouble(PyObject* poArgs, int pos, double* ret)
 		return false;
 
 	*ret = PyFloat_AsDouble(poItem);
+	if (PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
 	return true;
 }
 
@@ -113,6 +121,10 @@ bool PyTuple_GetFloat(PyObject* poArgs, int pos, float* ret)
 		return false;
 
 	*ret = float(PyFloat_AsDouble(poItem));
+	if (PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
 	return true;
 }
 
@@ -151,6 +163,10 @@ bool PyTuple_GetInteger(PyObject* poArgs, int pos, int* ret)
 		return false;
 	
 	*ret = PyLong_AsLong(poItem);
+	if (PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
 	return true;
 }
 
@@ -165,6 +181,10 @@ bool PyTuple_GetUnsignedLong(PyObject* poArgs, int pos, unsigned long* ret)
 		return false;
 	
 	*ret = PyLong_AsUnsignedLong(poItem);
+	if (PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
 	return true;
 }
 
@@ -179,6 +199,10 @@ bool PyTuple_GetUnsignedLongLong(PyObject* poArgs, int pos, unsigned long long* 
 		return false;
 
 	*ret = PyLong_AsUnsignedLongLong(poItem);
+	if (PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
 	return true;
 }
 
@@ -193,6 +217,10 @@ bool PyTuple_GetUnsignedInteger(PyObject* poArgs, int pos, unsigned int* ret)
 		return false;
 	
 	*ret = PyLong_AsUnsignedLong(poItem);
+	if (PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
 	return true;
 }
 
@@ -206,10 +234,21 @@ bool PyTuple_GetString(PyObject* poArgs, int pos, char** ret)
 	if (!poItem)
 		return false;
 
+#ifdef PYTHON_3
+	if (!PyUnicode_Check(poItem)) 
+		return false;
+
+	*ret = (char*)PyUnicode_AsUTF8(poItem);
+	if (!*ret || PyErr_Occurred()) {
+		PyErr_Clear();
+		return false;
+	}
+#else
 	if (!PyString_Check(poItem)) 
 		return false;
 
 	*ret = PyString_AsString(poItem);
+#endif
 	return true;
 }
 

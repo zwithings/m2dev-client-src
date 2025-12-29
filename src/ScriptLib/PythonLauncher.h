@@ -1,5 +1,11 @@
 #pragma once
+
+#ifdef PYTHON_3
+#include <frameobject.h>
+#else
 #include <python/frameobject.h>
+#endif
+
 #ifdef BYTE
 #undef BYTE
 #endif

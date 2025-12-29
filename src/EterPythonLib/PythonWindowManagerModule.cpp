@@ -2421,7 +2421,11 @@ PyObject* wndMgrIsScissorRectEnabled(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildValue("b", pWindow->IsScissorRectEnabled());
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_wndMgr(void)
+#else
 void initwndMgr()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -2627,7 +2631,19 @@ void initwndMgr()
 		{ NULL,							NULL,								NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef wndMgrmodule = {
+		PyModuleDef_HEAD_INIT,
+		"wndMgr",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&wndMgrmodule);
+#else
 	PyObject * poModule = Py_InitModule("wndMgr", s_methods);
+#endif
 
 // 하나의 딕셔너리에 너무 많은 Function이 포함 되는 것 같아 이런식으로 딕셔너리를 나누는 것을 고려 중 - [levites]
 //	PyObject * poMgrModule = Py_InitModule("wndMgr", s_methods);
@@ -2657,4 +2673,8 @@ void initwndMgr()
 	PyModule_AddIntConstant(poModule, "VERTICAL_ALIGN_BOTTOM",			UI::CWindow::VERTICAL_ALIGN_BOTTOM);
 
 	PyModule_AddIntConstant(poModule, "RENDERING_MODE_MODULATE",		CGraphicExpandedImageInstance::RENDERING_MODE_MODULATE);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

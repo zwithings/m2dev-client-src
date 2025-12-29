@@ -2194,7 +2194,11 @@ PyObject * skillTEST(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_skill(void)
+#else
 void initskill()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -2247,7 +2251,19 @@ void initskill()
 		{ NULL,										NULL,										NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef skillmodule = {
+		PyModuleDef_HEAD_INIT,
+		"skill",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&skillmodule);
+#else
 	PyObject * poModule = Py_InitModule("skill", s_methods);
+#endif
 	PyModule_AddIntConstant(poModule, "SKILL_TYPE_NONE",	CPythonSkill::SKILL_TYPE_NONE);
 	PyModule_AddIntConstant(poModule, "SKILL_TYPE_ACTIVE",	CPythonSkill::SKILL_TYPE_ACTIVE);
 	PyModule_AddIntConstant(poModule, "SKILL_TYPE_SUPPORT",	CPythonSkill::SKILL_TYPE_SUPPORT);
@@ -2259,4 +2275,8 @@ void initskill()
 	PyModule_AddIntConstant(poModule, "SKILL_GRADE_STEP_COUNT",	CPythonSkill::SKILL_GRADE_STEP_COUNT);
 	PyModule_AddIntConstant(poModule, "SKILL_GRADEGAP",			CPythonSkill::SKILL_GRADEGAP);
 	PyModule_AddIntConstant(poModule, "SKILL_EFFECT_COUNT",		CPythonSkill::SKILL_EFFECT_COUNT);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

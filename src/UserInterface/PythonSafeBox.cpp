@@ -309,7 +309,11 @@ PyObject * safeboxGetMallSize(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildValue("i", CPythonSafeBox::Instance().GetMallSize());
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_safebox(void)
+#else
 void initsafebox()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -331,8 +335,25 @@ void initsafebox()
 		{ NULL,							NULL,									NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef safeboxmodule = {
+		PyModuleDef_HEAD_INIT,
+		"safebox",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&safeboxmodule);
+#else
 	PyObject * poModule = Py_InitModule("safebox", s_methods);
+#endif
+
 	PyModule_AddIntConstant(poModule, "SAFEBOX_SLOT_X_COUNT", CPythonSafeBox::SAFEBOX_SLOT_X_COUNT);
 	PyModule_AddIntConstant(poModule, "SAFEBOX_SLOT_Y_COUNT", CPythonSafeBox::SAFEBOX_SLOT_Y_COUNT);
 	PyModule_AddIntConstant(poModule, "SAFEBOX_PAGE_SIZE", CPythonSafeBox::SAFEBOX_PAGE_SIZE);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

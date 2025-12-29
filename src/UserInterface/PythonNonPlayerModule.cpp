@@ -87,7 +87,11 @@ PyObject * nonplayerLoadNonPlayerData(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_nonplayer(void)
+#else
 void initNonPlayer()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -102,7 +106,19 @@ void initNonPlayer()
 		{ NULL,							NULL,								NULL		 },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef nonplayermodule = {
+		PyModuleDef_HEAD_INIT,
+		"nonplayer",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&nonplayermodule);
+#else
 	PyObject * poModule = Py_InitModule("nonplayer", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "ON_CLICK_EVENT_NONE",		CPythonNonPlayer::ON_CLICK_EVENT_NONE);
 	PyModule_AddIntConstant(poModule, "ON_CLICK_EVENT_BATTLE",		CPythonNonPlayer::ON_CLICK_EVENT_BATTLE);
@@ -116,4 +132,8 @@ void initNonPlayer()
 	PyModule_AddIntConstant(poModule, "S_KNIGHT", 3);
 	PyModule_AddIntConstant(poModule, "BOSS", 4);
 	PyModule_AddIntConstant(poModule, "KING", 5);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

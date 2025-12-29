@@ -1,3 +1,5 @@
+# Disable ASM for Crypto++ to avoid MASM cross-compilation issues
+set(DISABLE_ASM ON CACHE BOOL "Disable ASM for Crypto++" FORCE)
 add_subdirectory(cryptopp)
 add_subdirectory(lzo-2.10)
 add_subdirectory(mio)

@@ -19,7 +19,11 @@ PyObject * profilerPop(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_profiler(void)
+#else
 void initProfiler()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -29,5 +33,17 @@ void initProfiler()
 		{ NULL,					NULL,						NULL		 },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef profilermodule = {
+		PyModuleDef_HEAD_INIT,
+		"profiler",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&profilermodule);
+#else
 	Py_InitModule("profiler", s_methods);
+#endif
 }

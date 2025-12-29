@@ -2171,7 +2171,12 @@ PyObject* playerSendDragonSoulRefine(PyObject* poSelf, PyObject* poArgs)
 	
 	return Py_BuildNone();
 }
+
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_player(void)
+#else
 void initPlayer()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -2342,7 +2347,19 @@ void initPlayer()
 		{ NULL,							NULL,								NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef playermodule = {
+		PyModuleDef_HEAD_INIT,
+		"player",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject* poModule = PyModule_Create(&playermodule);
+#else
 	PyObject* poModule = Py_InitModule("player", s_methods);
+#endif
     PyModule_AddIntConstant(poModule, "LEVEL",					POINT_LEVEL);
     PyModule_AddIntConstant(poModule, "VOICE",					POINT_VOICE);
     PyModule_AddIntConstant(poModule, "EXP",					POINT_EXP);
@@ -2573,4 +2590,7 @@ void initPlayer()
 	PyModule_AddIntConstant(poModule, "DS_SUB_HEADER_DO_IMPROVEMENT",	DS_SUB_HEADER_DO_IMPROVEMENT);
 	PyModule_AddIntConstant(poModule, "DS_SUB_HEADER_DO_REFINE",	DS_SUB_HEADER_DO_REFINE);
 
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

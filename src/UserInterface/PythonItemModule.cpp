@@ -501,7 +501,11 @@ PyObject* itemLoadItemTable(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_item(void)
+#else
 void initItem()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{	
@@ -548,7 +552,19 @@ void initItem()
 		{ NULL,								NULL,									NULL		 },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef itemmodule = {
+		PyModuleDef_HEAD_INIT,
+		"item",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&itemmodule);
+#else
 	PyObject * poModule = Py_InitModule("item", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "USESOUND_ACCESSORY",			CPythonItem::USESOUND_ACCESSORY);
 	PyModule_AddIntConstant(poModule, "USESOUND_ARMOR",				CPythonItem::USESOUND_ARMOR);
@@ -836,5 +852,9 @@ void initItem()
 	PyModule_AddIntConstant(poModule, "APPLY_RESIST_EARTH",	CItemData::APPLY_RESIST_EARTH );		
 	PyModule_AddIntConstant(poModule, "APPLY_RESIST_DARK",	CItemData::APPLY_RESIST_DARK );		
 	PyModule_AddIntConstant(poModule, "APPLY_ANTI_CRITICAL_PCT",	CItemData::APPLY_ANTI_CRITICAL_PCT );		
-	PyModule_AddIntConstant(poModule, "APPLY_ANTI_PENETRATE_PCT",	CItemData::APPLY_ANTI_PENETRATE_PCT );		
+	PyModule_AddIntConstant(poModule, "APPLY_ANTI_PENETRATE_PCT",	CItemData::APPLY_ANTI_PENETRATE_PCT );
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

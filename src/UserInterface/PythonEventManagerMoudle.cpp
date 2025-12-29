@@ -269,7 +269,11 @@ PyObject * eventDestroy(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_event(void)
+#else
 void initEvent()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -306,10 +310,26 @@ void initEvent()
 		{ NULL,							NULL,								NULL         },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef eventmodule = {
+		PyModuleDef_HEAD_INIT,
+		"event",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&eventmodule);
+#else
 	PyObject * poModule = Py_InitModule("event", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "BOX_VISIBLE_LINE_COUNT", CPythonEventManager::BOX_VISIBLE_LINE_COUNT);
 	PyModule_AddIntConstant(poModule, "BUTTON_TYPE_NEXT", CPythonEventManager::BUTTON_TYPE_NEXT);
 	PyModule_AddIntConstant(poModule, "BUTTON_TYPE_DONE", CPythonEventManager::BUTTON_TYPE_DONE);
 	PyModule_AddIntConstant(poModule, "BUTTON_TYPE_CANCEL", CPythonEventManager::BUTTON_TYPE_CANCEL);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

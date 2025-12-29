@@ -523,7 +523,11 @@ PyObject * backgroundDisableGuildArea(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_background(void)
+#else
 void initBackground()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -585,7 +589,19 @@ void initBackground()
 		{ NULL, NULL, NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef backgroundmodule = {
+		PyModuleDef_HEAD_INIT,
+		"background",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&backgroundmodule);
+#else
 	PyObject * poModule = Py_InitModule("background", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "PART_SKY",				CMapOutdoor::PART_SKY);
 	PyModule_AddIntConstant(poModule, "PART_TREE",				CMapOutdoor::PART_TREE);
@@ -616,4 +632,8 @@ void initBackground()
 
 	PyModule_AddIntConstant(poModule, "DISTANCE_SORT", CMapOutdoor::DISTANCE_SORT);
 	PyModule_AddIntConstant(poModule, "TEXTURE_SORT", CMapOutdoor::TEXTURE_SORT);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

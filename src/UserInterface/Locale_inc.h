@@ -1,3 +1,10 @@
+//--------------------------------------------
+// Python Version Configuration
+//--------------------------------------------
+// PYTHON_3 is defined via CMake when USE_PYTHON3=ON
+// This allows conditional compilation for Python 2.7 vs 3.12 compatibility
+//--------------------------------------------
+
 #define _IMPROVED_PACKET_ENCRYPTION_
 
 #define ENABLE_COSTUME_SYSTEM

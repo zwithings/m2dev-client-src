@@ -31,6 +31,26 @@ extern "C" {
 #pragma comment(linker, "/NODEFAULTLIB:libci.lib")
 
 int Setup(LPSTR lpCmdLine);
+
+#ifdef PYTHON_3
+// Python 3.12 standard library files
+static const char * sc_apszPythonLibraryFilenames[] =
+{
+	// UserDict.pyc removed in Python 3 (replaced by collections.UserDict)
+	"__future__.pyc",
+	"copyreg.pyc",      // Renamed from copy_reg.pyc in Python 3
+	"linecache.pyc",
+	"ntpath.pyc",
+	"os.pyc",
+	"site.pyc",
+	"stat.pyc",
+	"string.pyc",
+	"traceback.pyc",
+	"types.pyc",
+	"\n",
+};
+#else
+// Python 2.7 standard library files
 static const char * sc_apszPythonLibraryFilenames[] =
 {
 	"UserDict.pyc",
@@ -46,6 +66,7 @@ static const char * sc_apszPythonLibraryFilenames[] =
 	"types.pyc",
 	"\n",
 };
+#endif
 
 bool CheckPythonLibraryFilenames()
 {
@@ -176,6 +197,9 @@ bool PackInitialize(const char * c_pszFolder)
 
 bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine)
 {
+#ifndef PYTHON_3
+	// Python 2.7: Initialize modules directly
+	// For Python 3.12, modules are registered via PyImport_AppendInittab in CPythonLauncher constructor
 	initpack();
 	initdbg();
 	initime();
@@ -211,6 +235,7 @@ bool RunMainScript(CPythonLauncher& pyLauncher, const char* lpCmdLine)
 	initsafebox();
 	initguild();
 	initServerStateChecker();
+#endif
 	std::string stRegisterDebugFlag;
 
 	#ifdef _DISTRIBUTE

@@ -9,9 +9,16 @@
 #include "PythonGraphic.h"
 #include "PythonWindowManager.h"
 
-void initgrp();
-void initgrpImage();
-void initgrpText();
-void initgrpThing();
-void initscriptWindow();
-void initwndMgr();
+#ifdef PYTHON_3
+	PyMODINIT_FUNC PyInit_grp(void);
+	PyMODINIT_FUNC PyInit_grpImage(void);
+	PyMODINIT_FUNC PyInit_grpText(void);
+	PyMODINIT_FUNC PyInit_grpThing(void);
+	PyMODINIT_FUNC PyInit_wndMgr(void);
+#else
+	void initgrp();
+	void initgrpImage();
+	void initgrpText();
+	void initgrpThing();
+	void initwndMgr();
+#endif

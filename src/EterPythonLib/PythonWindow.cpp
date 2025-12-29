@@ -261,7 +261,11 @@ namespace UI
 		if (!IsShow())
 			return;
 
+#ifdef PYTHON_3
+		static PyObject* poFuncName_OnUpdate = PyUnicode_InternFromString("OnUpdate");
+#else
 		static PyObject* poFuncName_OnUpdate = PyString_InternFromString("OnUpdate");
+#endif
 
 		//PyCallClassMemberFunc(m_poHandler, "OnUpdate", BuildEmptyTuple());
 		PyCallClassMemberFunc_ByPyString(m_poHandler, poFuncName_OnUpdate, BuildEmptyTuple());

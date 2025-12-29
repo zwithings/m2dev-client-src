@@ -253,7 +253,11 @@ PyObject * questClear(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_quest(void)
+#else
 void initquest()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -265,6 +269,23 @@ void initquest()
 		{ NULL,							NULL,							NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef questmodule = {
+		PyModuleDef_HEAD_INIT,
+		"quest",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&questmodule);
+#else
 	PyObject * poModule = Py_InitModule("quest", s_methods);
+#endif
+
 	PyModule_AddIntConstant(poModule, "QUEST_MAX_NUM", 5);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

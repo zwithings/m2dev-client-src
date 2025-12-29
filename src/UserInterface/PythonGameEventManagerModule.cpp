@@ -18,7 +18,11 @@ PyObject * eventMgrUpdate(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_eventMgr(void)
+#else
 void initeventmgr()
+#endif
 {
 	static PyMethodDef s_methods[] = 
 	{
@@ -26,5 +30,17 @@ void initeventmgr()
 		{ NULL,						NULL,							NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef eventMgrmodule = {
+		PyModuleDef_HEAD_INIT,
+		"eventMgr",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&eventMgrmodule);
+#else
 	Py_InitModule("eventMgr", s_methods);
+#endif
 }

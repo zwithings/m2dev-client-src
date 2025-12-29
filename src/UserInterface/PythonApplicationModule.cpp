@@ -1073,7 +1073,11 @@ PyObject* appIsRTL(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildValue("i", IsRTL() ? 1 : 0);
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_app(void)
+#else
 void initapp()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -1203,10 +1207,22 @@ void initapp()
 		{ "OnLogoClose",				appLogoClose,					METH_VARARGS },
 	
 
-		{ NULL, NULL },
+		{ NULL, NULL, NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef appmodule = {
+		PyModuleDef_HEAD_INIT,
+		"app",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&appmodule);
+#else
 	PyObject * poModule = Py_InitModule("app", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "INFO_ITEM",		CPythonApplication::INFO_ITEM);
 	PyModule_AddIntConstant(poModule, "INFO_ACTOR",		CPythonApplication::INFO_ACTOR);
@@ -1385,5 +1401,9 @@ void initapp()
 	PyModule_AddIntConstant(poModule, "ENABLE_NEW_EQUIPMENT_SYSTEM",	1);
 #else
 	PyModule_AddIntConstant(poModule, "ENABLE_NEW_EQUIPMENT_SYSTEM",	0);
+#endif
+
+#ifdef PYTHON_3
+	return poModule;
 #endif
 }

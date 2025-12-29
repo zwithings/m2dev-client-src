@@ -475,7 +475,11 @@ PyObject * chatGetLinkFromHyperlink(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildValue("s", "");
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_chat(void)
+#else
 void initChat()
+#endif
 {
 	static PyMethodDef s_methods[] = 
 	{
@@ -526,7 +530,19 @@ void initChat()
 		{ NULL,						NULL,						NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef chatmodule = {
+		PyModuleDef_HEAD_INIT,
+		"chat",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&chatmodule);
+#else
 	PyObject * poModule = Py_InitModule("chat", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "CHAT_TYPE_TALKING",		CHAT_TYPE_TALKING);
 	PyModule_AddIntConstant(poModule, "CHAT_TYPE_INFO",			CHAT_TYPE_INFO);
@@ -546,4 +562,8 @@ void initChat()
 
 	PyModule_AddIntConstant(poModule, "CHAT_SET_CHAT_WINDOW",	0);
 	PyModule_AddIntConstant(poModule, "CHAT_SET_LOG_WINDOW",	1);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

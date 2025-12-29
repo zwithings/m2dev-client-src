@@ -299,7 +299,11 @@ PyObject* miniMapGetGuildAreaID(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildValue("i", dwGuildID);
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_miniMap(void)
+#else
 void initMiniMap()
+#endif
 {
 	static PyMethodDef s_methods[] = 
 	{
@@ -343,7 +347,19 @@ void initMiniMap()
 		{ NULL, NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef miniMapmodule = {
+		PyModuleDef_HEAD_INIT,
+		"miniMap",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&miniMapmodule);
+#else
 	PyObject * poModule = Py_InitModule("miniMap", s_methods);
+#endif
 	
 	PyModule_AddIntConstant(poModule, "TYPE_OPC",			CPythonMiniMap::TYPE_OPC);
 	PyModule_AddIntConstant(poModule, "TYPE_OPCPVP",		CPythonMiniMap::TYPE_OPCPVP);
@@ -354,4 +370,8 @@ void initMiniMap()
 	PyModule_AddIntConstant(poModule, "TYPE_WAYPOINT",		CPythonMiniMap::TYPE_WAYPOINT);
 	PyModule_AddIntConstant(poModule, "TYPE_PARTY",		CPythonMiniMap::TYPE_PARTY);
 	PyModule_AddIntConstant(poModule, "TYPE_EMPIRE",		CPythonMiniMap::TYPE_EMPIRE);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

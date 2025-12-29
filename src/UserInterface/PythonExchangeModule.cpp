@@ -152,7 +152,11 @@ PyObject * exchangeSetElkMode(PyObject * poTarget, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_exchange(void)
+#else
 void initTrade()
+#endif
 {
 	static PyMethodDef s_methods[] = 
 	{
@@ -186,6 +190,23 @@ void initTrade()
 		{NULL, NULL},
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef exchangemodule = {
+		PyModuleDef_HEAD_INIT,
+		"exchange",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&exchangemodule);
+#else
 	PyObject * poModule = Py_InitModule("exchange", s_methods);
+#endif
+
 	PyModule_AddIntConstant(poModule, "EXCHANGE_ITEM_MAX_NUM", CPythonExchange::EXCHANGE_ITEM_MAX_NUM);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

@@ -145,7 +145,11 @@ PyObject * grpSetThingScale(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_grpThing(void)
+#else
 void initgrpThing()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -160,5 +164,17 @@ void initgrpThing()
 		{ NULL,						NULL,							NULL		 },
 	};	
 
+#ifdef PYTHON_3
+	static PyModuleDef grpThingmodule = {
+		PyModuleDef_HEAD_INIT,
+		"grpThing",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&grpThingmodule);
+#else
 	Py_InitModule("grpThing", s_methods);
+#endif
 }

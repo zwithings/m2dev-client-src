@@ -5,6 +5,7 @@ add_library(ScriptLib STATIC ${FILE_SOURCES})
 target_link_libraries(ScriptLib 
 	cryptopp-static
 	mio
+	Python
 )
 
 GroupSourcesByFolder(ScriptLib)

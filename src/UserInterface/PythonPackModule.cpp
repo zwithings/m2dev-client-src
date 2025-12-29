@@ -72,7 +72,11 @@ PyObject * packGet(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildException();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_pack(void)
+#else
 void initpack()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -80,6 +84,18 @@ void initpack()
 		{ "Get",		packGet,		METH_VARARGS },
 		{ NULL, NULL },		
 	};
-	
+
+#ifdef PYTHON_3
+	static PyModuleDef packmodule = {
+		PyModuleDef_HEAD_INIT,
+		"pack",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&packmodule);
+#else	
 	Py_InitModule("pack", s_methods);
+#endif
 }

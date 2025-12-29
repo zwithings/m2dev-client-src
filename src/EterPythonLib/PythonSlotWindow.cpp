@@ -1041,7 +1041,11 @@ void CSlotWindow::OnOverOutItem()
 		return;
 
 	m_dwToolTipSlotNumber = SLOT_NUMBER_NONE;
+#ifdef PYTHON_3
+	PyCallClassMemberFunc(m_poHandler, "OnOverOutItem", PyTuple_New(0));
+#else
 	PyCallClassMemberFunc(m_poHandler, "OnOverOutItem", Py_BuildValue("()"));
+#endif
 }
 
 void CSlotWindow::OnPressedSlotButton(DWORD dwType, DWORD dwSlotNumber, BOOL isLeft)

@@ -713,7 +713,11 @@ PyObject * chrmgrIsPossibleEmoticon(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildValue("i", result);
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_chrmgr(void)
+#else
 void initchrmgr()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -762,7 +766,19 @@ void initchrmgr()
 		{ NULL,							NULL,									NULL },
 	};	
 
+#ifdef PYTHON_3
+	static PyModuleDef chrmgrmodule = {
+		PyModuleDef_HEAD_INIT,
+		"chrmgr",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&chrmgrmodule);
+#else
 	PyObject * poModule = Py_InitModule("chrmgr", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "NAMECOLOR_MOB", CInstanceBase::NAMECOLOR_NORMAL_MOB);
 	PyModule_AddIntConstant(poModule, "NAMECOLOR_NPC", CInstanceBase::NAMECOLOR_NORMAL_NPC);
@@ -841,4 +857,7 @@ void initchrmgr()
 	PyModule_AddIntConstant(poModule, "EFFECT_HAPPINESS_RING_EQUIP",		CInstanceBase::EFFECT_HAPPINESS_RING_EQUIP);
 	PyModule_AddIntConstant(poModule, "EFFECT_LOVE_PENDANT_EQUIP",		CInstanceBase::EFFECT_LOVE_PENDANT_EQUIP);
 	
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

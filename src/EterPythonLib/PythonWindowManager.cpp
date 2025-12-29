@@ -56,7 +56,11 @@ namespace UI
 		m_ActiveWindowList.clear();
 		m_LockWindowList.clear();
 
+#ifdef PYTHON_3
+		gs_poEmptyTuple = PyTuple_New(0);
+#else
 		gs_poEmptyTuple = Py_BuildValue("()");
+#endif
 	}
 
 	CWindowManager::~CWindowManager()

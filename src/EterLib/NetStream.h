@@ -53,7 +53,6 @@ class CNetworkStream
 
 		void SetPacketSequenceMode(bool isOn);
 		bool SendSequence();
-		uint8_t GetNextSequence();
 
 	protected:			
 		virtual void OnConnectSuccess();				

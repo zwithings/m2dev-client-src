@@ -284,7 +284,11 @@ PyObject * grpGetHeight(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildValue("i", pImageInstance->GetHeight());
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_grpImage(void)
+#else
 void initgrpImage()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -306,5 +310,17 @@ void initgrpImage()
 		{ NULL,						NULL,							NULL		 },
 	};	
 
+#ifdef PYTHON_3
+	static PyModuleDef grpImagemodule = {
+		PyModuleDef_HEAD_INIT,
+		"grpImage",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&grpImagemodule);
+#else
 	Py_InitModule("grpImage", s_methods);
+#endif
 }

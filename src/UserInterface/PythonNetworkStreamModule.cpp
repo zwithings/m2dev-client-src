@@ -1675,7 +1675,11 @@ PyObject* netRegisterErrorLog(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_net(void)
+#else
 void initnet()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -1841,7 +1845,19 @@ void initnet()
 		{ NULL,										NULL,										NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef netmodule = {
+		PyModuleDef_HEAD_INIT,
+		"net",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject* poModule = PyModule_Create(&netmodule);
+#else
 	PyObject* poModule = Py_InitModule("net", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "ERROR_NONE", CPythonNetworkStream::ERROR_NONE);
 	PyModule_AddIntConstant(poModule, "ERROR_CONNECT_MARK_SERVER", CPythonNetworkStream::ERROR_CONNECT_MARK_SERVER);
@@ -1893,4 +1909,8 @@ void initnet()
 	PyModule_AddIntConstant(poModule, "DS_SUB_HEADER_REFINE_FAIL_NOT_ENOUGH_MATERIAL", DS_SUB_HEADER_REFINE_FAIL_NOT_ENOUGH_MATERIAL);
 	PyModule_AddIntConstant(poModule, "DS_SUB_HEADER_REFINE_FAIL_TOO_MUCH_MATERIAL", DS_SUB_HEADER_REFINE_FAIL_TOO_MUCH_MATERIAL);
 	PyModule_AddIntConstant(poModule, "DS_SUB_HEADER_REFINE_SUCCEED", DS_SUB_HEADER_REFINE_SUCCEED);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

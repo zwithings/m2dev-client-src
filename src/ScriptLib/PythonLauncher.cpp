@@ -1,5 +1,10 @@
 #include "StdAfx.h"
+#ifdef PYTHON_3
+#include "../UserInterface/StdAfx.h"
+#include <frameobject.h>
+#else
 #include <python/frameobject.h>
+#endif
 #ifdef BYTE
 #undef BYTE
 #endif
@@ -11,6 +16,51 @@
 
 CPythonLauncher::CPythonLauncher()
 {
+#ifdef PYTHON_3
+	// Register all Python modules before Py_Initialize()
+	// ScriptLib modules
+	PyImport_AppendInittab("dbg", PyInit_dbg);
+	
+	// PackLib module
+	PyImport_AppendInittab("pack", PyInit_pack);
+	
+	// EterPythonLib modules
+	PyImport_AppendInittab("grp", PyInit_grp);
+	PyImport_AppendInittab("grpImage", PyInit_grpImage);
+	PyImport_AppendInittab("grpText", PyInit_grpText);
+	PyImport_AppendInittab("grpThing", PyInit_grpThing);
+	PyImport_AppendInittab("wndMgr", PyInit_wndMgr);
+	
+	// UserInterface modules
+	PyImport_AppendInittab("udp", PyInit_udp);
+	PyImport_AppendInittab("app", PyInit_app);
+	PyImport_AppendInittab("ime", PyInit_ime);
+	PyImport_AppendInittab("systemSetting", PyInit_systemSetting);
+	PyImport_AppendInittab("chr", PyInit_chr);
+	PyImport_AppendInittab("chrmgr", PyInit_chrmgr);
+	PyImport_AppendInittab("player", PyInit_player);
+	PyImport_AppendInittab("item", PyInit_item);
+	PyImport_AppendInittab("nonplayer", PyInit_nonplayer);
+	PyImport_AppendInittab("exchange", PyInit_exchange);
+	PyImport_AppendInittab("chat", PyInit_chat);
+	PyImport_AppendInittab("textTail", PyInit_textTail);
+	PyImport_AppendInittab("net", PyInit_net);
+	PyImport_AppendInittab("miniMap", PyInit_miniMap);
+	PyImport_AppendInittab("profiler", PyInit_profiler);
+	PyImport_AppendInittab("event", PyInit_event);
+	PyImport_AppendInittab("effect", PyInit_effect);
+	PyImport_AppendInittab("fly", PyInit_fly);
+	PyImport_AppendInittab("snd", PyInit_snd);
+	PyImport_AppendInittab("eventMgr", PyInit_eventMgr);
+	PyImport_AppendInittab("shop", PyInit_shop);
+	PyImport_AppendInittab("skill", PyInit_skill);
+	PyImport_AppendInittab("quest", PyInit_quest);
+	PyImport_AppendInittab("background", PyInit_background);
+	PyImport_AppendInittab("messenger", PyInit_messenger);
+	PyImport_AppendInittab("safebox", PyInit_safebox);
+	PyImport_AppendInittab("guild", PyInit_guild);
+	PyImport_AppendInittab("ServerStateChecker", PyInit_ServerStateChecker);
+#endif
 	Py_Initialize();
 }
 
@@ -40,10 +90,22 @@ void Traceback()
 	PyObject * exc;
 	PyObject * v;
 	PyObject * tb;
-	const char * errStr;
-
 	PyErr_Fetch(&exc, &v, &tb);
-
+#ifdef PYTHON_3
+	PyObject* pyStr = PyObject_Str(v);
+	if (pyStr)
+	{
+		const char* errStr = PyUnicode_AsUTF8(pyStr);
+		if (errStr)
+		{
+			str.append("Error: ");
+			str.append(errStr);
+			Tracef("%s\n", errStr);
+		}
+		Py_DECREF(pyStr);
+	}
+#else
+	const char * errStr;
 	if (PyString_Check(v))
 	{
 		errStr = PyString_AS_STRING(v);
@@ -52,6 +114,7 @@ void Traceback()
 
 		Tracef("%s\n", errStr);
 	}
+#endif
 	Py_DECREF(exc);
 	Py_DECREF(v);
 	Py_DECREF(tb);
@@ -62,6 +125,10 @@ int TraceFunc(PyObject * obj, PyFrameObject * f, int what, PyObject *arg)
 {
 	const char * funcname;
 	char szTraceBuffer[128];
+#ifdef PYTHON_3
+	int lineno;
+	PyCodeObject* code = nullptr;
+#endif
 
 	switch (what)
 	{
@@ -69,6 +136,18 @@ int TraceFunc(PyObject * obj, PyFrameObject * f, int what, PyObject *arg)
 			if (g_nCurTraceN >= 512)
 				return 0;
 
+#ifdef PYTHON_3
+			code = (PyCodeObject*)PyFrame_GetCode(f);
+			lineno = PyFrame_GetLineNumber(f);
+
+			funcname = PyUnicode_AsUTF8(code->co_name);
+
+			snprintf(szTraceBuffer, sizeof(szTraceBuffer), "Call: File \"%s\", line %d, in %s",
+				PyUnicode_AsUTF8(code->co_filename),
+				lineno,
+				funcname);
+			Py_DECREF(code);
+#else
 			if (Py_OptimizeFlag)
 				f->f_lineno = PyCode_Addr2Line(f->f_code, f->f_lasti);
 
@@ -78,6 +157,7 @@ int TraceFunc(PyObject * obj, PyFrameObject * f, int what, PyObject *arg)
 					  PyString_AsString(f->f_code->co_filename), 
 					  f->f_lineno,
 					  funcname);
+#endif
 
 			g_stTraceBuffer[g_nCurTraceN++]=szTraceBuffer;			
 			break;
@@ -98,6 +178,18 @@ int TraceFunc(PyObject * obj, PyFrameObject * f, int what, PyObject *arg)
 			PyTuple_GetObject(arg, 2, &exc_traceback);
 
 			Py_ssize_t len;
+#ifdef PYTHON_3
+			const char* exc_str = PyUnicode_AsUTF8AndSize(exc_type, &len);
+
+			code = (PyCodeObject*)PyFrame_GetCode(f);
+			lineno = PyFrame_GetLineNumber(f);
+
+			snprintf(szTraceBuffer, sizeof(szTraceBuffer), "Exception: File \"%s\", line %d, in %s",
+				PyUnicode_AsUTF8(code->co_filename),
+				lineno,
+				PyUnicode_AsUTF8(code->co_name));
+			Py_DECREF(code);
+#else
 			const char * exc_str;
 			PyObject_AsCharBuffer(exc_type, &exc_str, &len);
 			
@@ -105,6 +197,7 @@ int TraceFunc(PyObject * obj, PyFrameObject * f, int what, PyObject *arg)
 					  PyString_AS_STRING(f->f_code->co_filename), 
 					  f->f_lineno,
 					  PyString_AS_STRING(f->f_code->co_name));
+#endif
 
 			g_stTraceBuffer[g_nCurTraceN++]=szTraceBuffer;
 			
@@ -121,9 +214,33 @@ void CPythonLauncher::SetTraceFunc(int (*pFunc)(PyObject * obj, PyFrameObject * 
 bool CPythonLauncher::Create(const char* c_szProgramName)
 {
 	NANOBEGIN
+#ifdef PYTHON_3
+	wchar_t wszProgramName[MAX_PATH];
+	MultiByteToWideChar(CP_ACP, 0, c_szProgramName, -1, wszProgramName, MAX_PATH);
+
+	PyStatus status;
+	PyConfig config;
+	PyConfig_InitPythonConfig(&config);
+	status = PyConfig_SetString(&config, &config.program_name, wszProgramName);
+	if (PyStatus_Exception(status)) {
+		PyConfig_Clear(&config);
+		Py_ExitStatusException(status);
+		return false;
+	}
+	status = Py_InitializeFromConfig(&config);
+	if (PyStatus_Exception(status)) {
+		PyConfig_Clear(&config);
+		Py_ExitStatusException(status);
+		return false;
+	}
+	PyConfig_Clear(&config);
+#else
 	Py_SetProgramName((char*)c_szProgramName);
+#endif
+#ifndef PYTHON_3
 #ifdef _DEBUG
 	PyEval_SetTrace(TraceFunc, NULL);
+#endif
 #endif
 	m_poModule = PyImport_AddModule((char *) "__main__");
 
@@ -132,10 +249,14 @@ bool CPythonLauncher::Create(const char* c_szProgramName)
 	
 	m_poDic = PyModule_GetDict(m_poModule);
 
-    PyObject * builtins = PyImport_ImportModule("__builtin__");
+#ifdef PYTHON_3
+	PyObject* builtins = PyImport_ImportModule("builtins");
+#else
+	PyObject * builtins = PyImport_ImportModule("__builtin__");
+#endif
 	PyModule_AddIntConstant(builtins, "TRUE", 1);
 	PyModule_AddIntConstant(builtins, "FALSE", 0);
-    PyDict_SetItemString(m_poDic, "__builtins__", builtins);
+	PyDict_SetItemString(m_poDic, "__builtins__", builtins);
 	Py_DECREF(builtins);
 
 	if (!RunLine("import __main__"))
@@ -158,7 +279,11 @@ bool CPythonLauncher::RunCompiledFile(const char* c_szFileName)
 	if (!fp)
 		return false;
 
+#ifdef PYTHON_3
+	PyObject *co;
+#else
 	PyCodeObject *co;
+#endif
 	PyObject *v;
 	long magic;
 	long PyImport_GetMagicNumber(void);
@@ -184,7 +309,11 @@ bool CPythonLauncher::RunCompiledFile(const char* c_szFileName)
 		return false;
 	}
 
+#ifdef PYTHON_3
+	co = (PyObject *) v;
+#else
 	co = (PyCodeObject *) v;
+#endif
 	v = PyEval_EvalCode(co, m_poDic, m_poDic);
 /*	if (v && flags)
 		flags->cf_flags |= (co->co_flags & PyCF_MASK);*/
@@ -196,8 +325,10 @@ bool CPythonLauncher::RunCompiledFile(const char* c_szFileName)
 	}
 
 	Py_DECREF(v);
+#ifndef PYTHON_3
 	if (Py_FlushLine()) 
 		PyErr_Clear();
+#endif
 
 	NANOEND
 	return true;
@@ -266,8 +397,13 @@ const char* CPythonLauncher::GetError()
 
 	PyErr_Fetch(&exc, &v, &tb);        
 
+#ifdef PYTHON_3
+	if (PyUnicode_Check(v))
+		return PyUnicode_AsUTF8(v);
+#else
 	if (PyString_Check(v))
 		return PyString_AS_STRING(v);
+#endif
 	
 	return "";
 }

@@ -732,7 +732,11 @@ PyObject * guildGetMarkIndexByMarkID(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildValue("i", markID % CGuildMarkImage::MARK_TOTAL_COUNT);
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_guild(void)
+#else
 void initguild()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -790,10 +794,27 @@ void initguild()
 		{ NULL,								NULL,								NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef guildmodule = {
+		PyModuleDef_HEAD_INIT,
+		"guild",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&guildmodule);
+#else
 	PyObject * poModule = Py_InitModule("guild", s_methods);
+#endif
+
 	PyModule_AddIntConstant(poModule, "AUTH_ADD_MEMBER", GUILD_AUTH_ADD_MEMBER);
 	PyModule_AddIntConstant(poModule, "AUTH_REMOVE_MEMBER", GUILD_AUTH_REMOVE_MEMBER);
 	PyModule_AddIntConstant(poModule, "AUTH_NOTICE", GUILD_AUTH_NOTICE);
 	PyModule_AddIntConstant(poModule, "AUTH_SKILL", GUILD_AUTH_SKILL);
 	PyModule_AddIntConstant(poModule, "ENEMY_GUILD_SLOT_MAX_COUNT", CPythonGuild::ENEMY_GUILD_SLOT_MAX_COUNT);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

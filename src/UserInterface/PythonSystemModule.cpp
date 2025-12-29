@@ -372,7 +372,11 @@ PyObject * systemSetShadowLevel(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_systemSetting(void)
+#else
 void initsystem()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -429,7 +433,19 @@ void initsystem()
 		{ NULL,							NULL,							NULL }
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef systemSettingmodule = {
+		PyModuleDef_HEAD_INIT,
+		"systemSetting",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&systemSettingmodule);
+#else
 	PyObject * poModule = Py_InitModule("systemSetting", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "WINDOW_STATUS",		CPythonSystem::WINDOW_STATUS);
 	PyModule_AddIntConstant(poModule, "WINDOW_INVENTORY",	CPythonSystem::WINDOW_INVENTORY);
@@ -442,4 +458,7 @@ void initsystem()
 	PyModule_AddIntConstant(poModule, "WINDOW_GAUGE",		CPythonSystem::WINDOW_GAUGE);
 	PyModule_AddIntConstant(poModule, "WINDOW_MINIMAP",		CPythonSystem::WINDOW_MINIMAP);
 	PyModule_AddIntConstant(poModule, "WINDOW_CHAT",		CPythonSystem::WINDOW_CHAT);
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

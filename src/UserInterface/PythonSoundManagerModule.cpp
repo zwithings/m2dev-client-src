@@ -116,7 +116,11 @@ PyObject* sndSetSoundVolume(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_snd(void)
+#else
 void initsnd()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -135,5 +139,17 @@ void initsnd()
 		{ NULL,						NULL,						NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef sndmodule = {
+		PyModuleDef_HEAD_INIT,
+		"snd",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&sndmodule);
+#else
 	Py_InitModule("snd", s_methods);
+#endif
 }

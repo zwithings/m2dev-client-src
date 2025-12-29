@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ASan support
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
+# Python 3.14 support
+option(USE_PYTHON3 "Use Python 3.14 instead of Python 2.7" OFF)
+
 set(CMAKE_MODULE_PATH
 	${CMAKE_MODULE_PATH}
 	"${CMAKE_CURRENT_SOURCE_DIR}/buildtool"
@@ -57,11 +60,22 @@ add_definitions(-DUSE_LOD)
 add_definitions(-DDUNGEON_WORK)
 add_definitions(-DBUILDING_GRANNY_STATIC)
 add_definitions(-DGRANNY_THREADED)
-add_definitions(-DPy_NO_ENABLE_SHARED)
+# Py_NO_ENABLE_SHARED is only for Python 2.7 static build
+if(NOT USE_PYTHON3)
+    add_definitions(-DPy_NO_ENABLE_SHARED)
+endif()
 
 add_compile_definitions("$<$<CONFIG:Debug>:DEBUG>")
 add_compile_definitions("$<$<CONFIG:RelWithDebInfo>:_DISTRIBUTE>")
 add_compile_definitions("$<$<CONFIG:Release>:_DISTRIBUTE>")
+
+# Python 3.14 support - must be before include_directories to ensure correct header order
+if(USE_PYTHON3)
+    # Define PYTHON_3 globally so all targets use Python 3.14 headers
+    add_definitions(-DPYTHON_3)
+    # Add Python 3.14 headers BEFORE extern/include to ensure they are found first
+    include_directories("extern/include/python314")
+endif()
 
 include_directories("src")
 include_directories("extern/include")

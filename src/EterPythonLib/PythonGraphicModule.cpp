@@ -948,7 +948,11 @@ PyObject * grpGetTargetPosition(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildValue("fff", v3Target.x, v3Target.y, v3Target.z);
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_grp(void)
+#else
 void initgrp()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -1011,5 +1015,17 @@ void initgrp()
 		{ NULL,							NULL,							NULL		},
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef grpmodule = {
+		PyModuleDef_HEAD_INIT,
+		"grp",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&grpmodule);
+#else
 	Py_InitModule("grp", s_methods);
+#endif
 }

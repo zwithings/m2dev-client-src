@@ -4,7 +4,9 @@
    it would have to take circular links and sharing into account. */
 
 #include "Stdafx.h"
+#ifndef PYTHON_3
 #include <python/longintrepr.h>
+#endif
 #ifdef BYTE
 #undef BYTE
 #endif
@@ -151,12 +153,28 @@ static PyObject * r_object(RFILE *p)
 		return Py_Ellipsis;
 
 	case TYPE_INT:
+#ifdef PYTHON_3
+		return PyLong_FromLong(r_long(p));
+#else
 		return PyInt_FromLong(r_long(p));
+#endif
 
 	case TYPE_INT64:
 		return r_long64(p);
 
 	case TYPE_LONG:
+#ifdef PYTHON_3
+		{
+			long n = r_long(p);
+
+			if (n >= INT_MIN && n <= INT_MAX) {
+				return PyLong_FromLong(n);
+			}
+			else {
+				return PyLong_FromLongLong((long long)n);
+			}
+		}
+#else
 		{
 			int size;
 			PyLongObject* ob;
@@ -170,6 +188,7 @@ static PyObject * r_object(RFILE *p)
 				ob->ob_digit[i] = (short) r_short(p);
 			return (PyObject *) ob;
 		}
+#endif
 
 	case TYPE_FLOAT:
 		{
@@ -223,6 +242,16 @@ static PyObject * r_object(RFILE *p)
 			PyErr_SetString(PyExc_ValueError, "bad marshal data");
 			return NULL;
 		}
+#ifdef PYTHON_3
+		v = PyBytes_FromStringAndSize(NULL, n);
+		if (v != NULL) {
+			if (r_string(PyBytes_AS_STRING(v), (int)n, p) != n) {
+				Py_DECREF(v);
+				v = NULL;
+				PyErr_SetString(PyExc_EOFError, "EOF read where object expected");
+			}
+		}
+#else
 		v = PyString_FromStringAndSize((char *)NULL, n);
 		if (v != NULL) {
 			if (r_string(PyString_AS_STRING(v), (int)n, p) != n) {
@@ -232,6 +261,7 @@ static PyObject * r_object(RFILE *p)
 					"EOF read where object expected");
 			}
 		}
+#endif
 		return v;
 
 #ifdef Py_USING_UNICODE
@@ -317,6 +347,29 @@ static PyObject * r_object(RFILE *p)
 		return v;
 
 	case TYPE_CODE:
+	{
+#ifdef PYTHON_3
+		PyObject* filename = NULL;
+		PyObject* name = NULL;
+		int firstlineno = 0;
+		filename = r_object(p);
+		if (filename) name = r_object(p);
+		if (name) {
+			firstlineno = r_short(p);
+		}
+		if (!PyErr_Occurred()) {
+			v = (PyObject*)PyCode_NewEmpty(
+				PyUnicode_AsUTF8(filename),
+				PyUnicode_AsUTF8(name),
+				firstlineno
+			);
+		} else {
+			v = NULL;
+		}
+		Py_XDECREF(filename);
+		Py_XDECREF(name);
+		return v;
+#else
 		if (PyEval_GetRestricted()) {
 			PyErr_SetString(PyExc_RuntimeError,
 				"cannot unmarshal code objects in "
@@ -373,6 +426,8 @@ static PyObject * r_object(RFILE *p)
 
 		}
 		return v;
+#endif
+	}
 
 	default:
 		/* Bogus data got written, which isn't ideal.

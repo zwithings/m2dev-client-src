@@ -399,7 +399,11 @@ PyObject * shopGetTabCoinType(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildValue("i", CPythonShop::instance().GetTabCoinType(bTabIdx));
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_shop(void)
+#else
 void initshop()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -426,9 +430,26 @@ void initshop()
 		{ "BuildPrivateShop",			shopBuildPrivateShop,			METH_VARARGS },
 		{ NULL,							NULL,							NULL },
 	};
+
+#ifdef PYTHON_3
+	static PyModuleDef shopmodule = {
+		PyModuleDef_HEAD_INIT,
+		"shop",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&shopmodule);
+#else
 	PyObject * poModule = Py_InitModule("shop", s_methods);
+#endif
 
 	PyModule_AddIntConstant(poModule, "SHOP_SLOT_COUNT", SHOP_HOST_ITEM_MAX_NUM);
 	PyModule_AddIntConstant(poModule, "SHOP_COIN_TYPE_GOLD", SHOP_COIN_TYPE_GOLD);
 	PyModule_AddIntConstant(poModule, "SHOP_COIN_TYPE_SECONDARY_COIN", SHOP_COIN_TYPE_SECONDARY_COIN);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }

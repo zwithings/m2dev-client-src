@@ -61,17 +61,36 @@ PyObject* dbgRegisterExceptionString(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+static PyMethodDef s_methods[] =
+{
+	{ "LogBox",						dbgLogBox,					METH_VARARGS },
+	{ "Trace",						dbgTrace,					METH_VARARGS },
+	{ "Tracen",						dbgTracen,					METH_VARARGS },
+	{ "TraceError",					dbgTraceError,				METH_VARARGS },
+	{ "RegisterExceptionString",	dbgRegisterExceptionString,	METH_VARARGS },
+	{ NULL, NULL},
+};
+
+#ifdef PYTHON_3
+static PyModuleDef dbgmodule = {
+	PyModuleDef_HEAD_INIT,
+	"dbg",
+	"Debug module for logging and tracing",
+	-1,
+	s_methods,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
+PyMODINIT_FUNC PyInit_dbg(void)
+{
+	return PyModule_Create(&dbgmodule);
+}
+#else
 void initdbg()
 {
-	static PyMethodDef s_methods[] =
-	{
-		{ "LogBox",						dbgLogBox,					METH_VARARGS },
-		{ "Trace",						dbgTrace,					METH_VARARGS },
-		{ "Tracen",						dbgTracen,					METH_VARARGS },
-		{ "TraceError",					dbgTraceError,				METH_VARARGS },
-		{ "RegisterExceptionString",	dbgRegisterExceptionString,	METH_VARARGS },
-		{ NULL, NULL},
-	};	
-
 	Py_InitModule("dbg", s_methods);
 }
+#endif

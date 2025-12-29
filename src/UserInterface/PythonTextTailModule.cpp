@@ -197,7 +197,11 @@ PyObject * textTailEnablePKTitle(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_textTail(void)
+#else
 void initTextTail()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -231,5 +235,17 @@ void initTextTail()
 		{ NULL, NULL, NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef textTailmodule = {
+		PyModuleDef_HEAD_INIT,
+		"textTail",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&textTailmodule);
+#else
 	Py_InitModule("textTail", s_methods);
+#endif
 }

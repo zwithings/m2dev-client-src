@@ -47,7 +47,11 @@ PyObject * ServerStateCheckerInitialize(PyObject* poSelf, PyObject* poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_ServerStateChecker(void)
+#else
 void initServerStateChecker()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -59,6 +63,18 @@ void initServerStateChecker()
 		{ NULL,			NULL,							NULL },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef ServerStateCheckermodule = {
+		PyModuleDef_HEAD_INIT,
+		"ServerStateChecker",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	return PyModule_Create(&ServerStateCheckermodule);
+#else
 	//PyObject * poModule = Py_InitModule("ServerStateChecker", s_methods);
 	Py_InitModule("ServerStateChecker", s_methods);
+#endif
 }

@@ -87,7 +87,11 @@ PyObject * effectRegisterIndexedFlyData(PyObject * poSelf, PyObject * poArgs)
 	return Py_BuildNone();
 }
 
+#ifdef PYTHON_3
+PyMODINIT_FUNC PyInit_effect(void)
+#else
 void initeffect()
+#endif
 {
 	static PyMethodDef s_methods[] =
 	{
@@ -104,7 +108,19 @@ void initeffect()
 		{ NULL,							NULL,							NULL         },
 	};
 
+#ifdef PYTHON_3
+	static PyModuleDef effectmodule = {
+		PyModuleDef_HEAD_INIT,
+		"effect",
+		NULL,
+		-1,
+		s_methods
+	};
+
+	PyObject * poModule = PyModule_Create(&effectmodule);
+#else
 	PyObject * poModule = Py_InitModule("effect", s_methods);
+#endif
 	PyModule_AddIntConstant(poModule, "INDEX_FLY_TYPE_NORMAL",			CFlyingManager::INDEX_FLY_TYPE_NORMAL);
 	PyModule_AddIntConstant(poModule, "INDEX_FLY_TYPE_FIRE_CRACKER",	CFlyingManager::INDEX_FLY_TYPE_FIRE_CRACKER);
 	PyModule_AddIntConstant(poModule, "INDEX_FLY_TYPE_AUTO_FIRE",		CFlyingManager::INDEX_FLY_TYPE_AUTO_FIRE);
@@ -147,4 +163,8 @@ void initeffect()
 	PyModule_AddIntConstant(poModule, "FLY_CHAIN_LIGHTNING",	FLY_CHAIN_LIGHTNING);
 	PyModule_AddIntConstant(poModule, "FLY_HP_SMALL",			FLY_HP_SMALL);
 	PyModule_AddIntConstant(poModule, "FLY_SKILL_MUYEONG",		FLY_SKILL_MUYEONG);
+
+#ifdef PYTHON_3
+	return poModule;
+#endif
 }
