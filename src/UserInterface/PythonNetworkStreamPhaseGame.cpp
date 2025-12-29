@@ -1142,6 +1142,12 @@ bool CPythonNetworkStream::SendCharacterStatePacket(const TPixelPosition& c_rkPP
 // NOTE : SlotIndex는 임시
 bool CPythonNetworkStream::SendUseSkillPacket(DWORD dwSkillIndex, DWORD dwTargetVID)
 {
+	TPacketCGUseSkill UseSkillPacket;
+
+	UseSkillPacket.bHeader = HEADER_CG_USE_SKILL;
+	UseSkillPacket.dwVnum = dwSkillIndex;
+	UseSkillPacket.dwTargetVID = dwTargetVID;
+
 	// tw1x1 fix wrong fly targeting for viewing clients
 	if (dwTargetVID)
 	{
@@ -1167,12 +1173,6 @@ bool CPythonNetworkStream::SendUseSkillPacket(DWORD dwSkillIndex, DWORD dwTarget
 		}
 	}
 	// END OF tw1x1 fix wrong fly targeting for viewing clients
-
-	TPacketCGUseSkill UseSkillPacket;
-
-	UseSkillPacket.bHeader = HEADER_CG_USE_SKILL;
-	UseSkillPacket.dwVnum = dwSkillIndex;
-	UseSkillPacket.dwTargetVID = dwTargetVID;
 
 	if (!Send(sizeof(TPacketCGUseSkill), &UseSkillPacket))
 	{
