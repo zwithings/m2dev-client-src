@@ -65,7 +65,12 @@ PyObject * packGet(PyObject * poSelf, PyObject * poArgs)
 		{
 			TPackFile file;
 			if (CPackManager::Instance().GetFile(strFileName, file))
-				return Py_BuildValue("s#",file.data(), file.size());
+#ifdef PYTHON_3
+				// Python 3: Return bytes object to avoid UTF-8 decode errors
+				return Py_BuildValue("y#", file.data(), file.size());
+#else
+				return Py_BuildValue("s#", file.data(), file.size());
+#endif
 		}
 	}
 

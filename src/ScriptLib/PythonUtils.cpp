@@ -19,7 +19,10 @@ PyObject * Py_BadArgument()
 PyObject * Py_BuildException(const char * c_pszErr, ...)
 {
 	if (!c_pszErr)
+	{
 		PyErr_Clear();
+		return Py_BuildNone();
+	}
 	else
 	{
 		char szErrBuf[512+1];
@@ -29,10 +32,8 @@ PyObject * Py_BuildException(const char * c_pszErr, ...)
 		va_end(args);
 
 		PyErr_SetString(PyExc_RuntimeError, szErrBuf);
+		return NULL;  // Must return NULL when exception is set (Python 3 requirement)
 	}
-
-	return Py_BuildNone();
-	//return NULL;
 }
 
 PyObject * Py_BuildNone()
