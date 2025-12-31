@@ -260,8 +260,9 @@ void CGraphicTextInstance::Update()
 				// Flush current segment with BiDi before changing color
 				if (!currentSegment.empty())
 				{
+					// Use auto-detection for BiDi (don't force RTL)
 					std::vector<wchar_t> visual = BuildVisualBidiText_Tagless(
-						currentSegment.data(), (int)currentSegment.size(), m_computedRTL);
+						currentSegment.data(), (int)currentSegment.size(), false);
 					for (size_t j = 0; j < visual.size(); ++j)
 					{
 						int w = __DrawCharacter(pFontTexture, visual[j], currentColor);
@@ -277,8 +278,9 @@ void CGraphicTextInstance::Update()
 				// Flush segment before restoring color
 				if (!currentSegment.empty())
 				{
+					// Use auto-detection for BiDi (don't force RTL)
 					std::vector<wchar_t> visual = BuildVisualBidiText_Tagless(
-						currentSegment.data(), (int)currentSegment.size(), m_computedRTL);
+						currentSegment.data(), (int)currentSegment.size(), false);
 					for (size_t j = 0; j < visual.size(); ++j)
 					{
 						int w = __DrawCharacter(pFontTexture, visual[j], currentColor);
@@ -303,8 +305,9 @@ void CGraphicTextInstance::Update()
 					// Flush any pending non-hyperlink segment first
 					if (!currentSegment.empty())
 					{
+						// Use auto-detection for BiDi (don't force RTL)
 						std::vector<wchar_t> visual = BuildVisualBidiText_Tagless(
-							currentSegment.data(), (int)currentSegment.size(), m_computedRTL);
+							currentSegment.data(), (int)currentSegment.size(), false);
 						for (size_t j = 0; j < visual.size(); ++j)
 						{
 							int w = __DrawCharacter(pFontTexture, visual[j], currentColor);
@@ -417,8 +420,9 @@ void CGraphicTextInstance::Update()
 		// Flush any remaining segment
 		if (!currentSegment.empty())
 		{
+			// Use auto-detection for BiDi (don't force RTL)
 			std::vector<wchar_t> visual = BuildVisualBidiText_Tagless(
-				currentSegment.data(), (int)currentSegment.size(), m_computedRTL);
+				currentSegment.data(), (int)currentSegment.size(), false);
 			for (size_t j = 0; j < visual.size(); ++j)
 			{
 				int w = __DrawCharacter(pFontTexture, visual[j], currentColor);
